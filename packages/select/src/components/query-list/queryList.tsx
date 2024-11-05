@@ -522,16 +522,18 @@ export class QueryList<T, A extends readonly T[] = T[]> extends AbstractComponen
     };
 
     private handleKeyDown = (event: React.KeyboardEvent<HTMLElement>) => {
-        const { key } = event;
-        const direction = Utils.getArrowKeyDirection(event, ["ArrowUp"], ["ArrowDown"]);
-        if (direction !== undefined) {
-            event.preventDefault();
-            const nextActiveItem = this.getNextActiveItem(direction);
-            if (nextActiveItem != null) {
-                this.setActiveItem(nextActiveItem);
+        if (!event.nativeEvent.isComposing) {
+            const { key } = event;
+            const direction = Utils.getArrowKeyDirection(event, ["ArrowUp"], ["ArrowDown"]);
+            if (direction !== undefined) {
+                event.preventDefault();
+                const nextActiveItem = this.getNextActiveItem(direction);
+                if (nextActiveItem != null) {
+                    this.setActiveItem(nextActiveItem);
+                }
+            } else if (key === "Enter") {
+                this.isEnterKeyPressed = true;
             }
-        } else if (key === "Enter") {
-            this.isEnterKeyPressed = true;
         }
 
         this.props.onKeyDown?.(event);
