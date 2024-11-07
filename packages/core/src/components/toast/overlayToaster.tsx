@@ -43,6 +43,14 @@ export interface OverlayToasterState {
 
 export type OverlayToasterCreateOptions = DOMMountOptions<OverlayToasterProps>;
 
+interface OverlayToasterQueueState {
+    cancel: (() => void) | undefined;
+    isRunning: boolean;
+    toasts: ToastOptions[];
+}
+
+export const OVERLAY_TOASTER_DELAY_MS = 50;
+
 /**
  * OverlayToaster component.
  *
@@ -132,6 +140,14 @@ export class OverlayToaster extends AbstractPureComponent<OverlayToasterProps, O
         toasts: [],
     };
 
+    // Queue of toasts to be displayed. If toasts are shown too quickly back to back, it can result in cut off toasts.
+    // The queue ensures that toasts are only displayed in QUEUE_TIMEOUT_MS increments.
+    private queue: OverlayToasterQueueState = {
+        cancel: undefined,
+        isRunning: false,
+        toasts: [],
+    };
+
     // auto-incrementing identifier for un-keyed toasts
     private toastId = 0;
 
@@ -152,23 +168,62 @@ export class OverlayToaster extends AbstractPureComponent<OverlayToasterProps, O
             return options.key;
         }
 
+        if (this.queue.isRunning) {
+            // If a toast has been shown recently, push to the queued toasts to prevent toasts from being shown too
+            // quickly for the animations to keep up
+            this.queue.toasts.push(options);
+        } else {
+            // If we have not recently shown a toast, we can immediately show the given toast
+            this.immediatelyShowToast(options);
+            this.startQueueTimeout();
+        }
+
+        return options.key;
+    }
+
+    private maybeUpdateExistingToast(options: ToastOptions, key: string | undefined) {
+        if (key == null) {
+            return false;
+        }
+
+        const isExistingQueuedToast = this.queue.toasts.some(toast => toast.key === key);
+        if (isExistingQueuedToast) {
+            this.queue.toasts = this.queue.toasts.map(t => (t.key === key ? options : t));
+            return true;
+        }
+
+        const isExistingShownToast = this.state.toasts.some(toast => toast.key === key);
+        if (isExistingShownToast) {
+            this.updateToastsInState(toasts => toasts.map(t => (t.key === key ? options : t)));
+            return true;
+        }
+
+        return false;
+    }
+
+    private immediatelyShowToast(options: ToastOptions) {
         if (this.props.maxToasts) {
             // check if active number of toasts are at the maxToasts limit
             this.dismissIfAtLimit();
         }
 
         this.updateToastsInState(toasts => [options, ...toasts]);
-        return options.key;
     }
 
-    private maybeUpdateExistingToast(options: ToastOptions, key: string | undefined) {
-        if (key == null || this.isNewToastKey(key)) {
-            return false;
+    private startQueueTimeout() {
+        this.queue.isRunning = true;
+        this.queue.cancel = this.setTimeout(this.handleQueueTimeout, OVERLAY_TOASTER_DELAY_MS);
+    }
+
+    private handleQueueTimeout = () => {
+        const nextToast = this.queue.toasts.shift();
+        if (nextToast != null) {
+            this.immediatelyShowToast(nextToast);
+            this.startQueueTimeout();
+        } else {
+            this.queue.isRunning = false;
         }
-
-        this.updateToastsInState(toasts => toasts.map(t => (t.key === key ? options : t)));
-        return true;
-    }
+    };
 
     private updateToastsInState(getNewToasts: (toasts: ToastOptions[]) => ToastOptions[]) {
         this.setState(prevState => {
@@ -191,6 +246,8 @@ export class OverlayToaster extends AbstractPureComponent<OverlayToasterProps, O
     }
 
     public clear() {
+        this.queue.cancel?.();
+        this.queue = { cancel: undefined, isRunning: false, toasts: [] };
         this.state.toasts.forEach(t => t.onDismiss?.(false));
         this.setState({ toasts: [], toastRefs: {} });
     }
@@ -250,10 +307,6 @@ export class OverlayToaster extends AbstractPureComponent<OverlayToasterProps, O
                 return child;
             }
         });
-    }
-
-    private isNewToastKey(key: string) {
-        return this.state.toasts.every(toast => toast.key !== key);
     }
 
     private dismissIfAtLimit() {
