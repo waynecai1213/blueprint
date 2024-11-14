@@ -45,7 +45,7 @@
   width: $pt-grid-size * 35;
 }
 
-#{example("Buttons")} {
+#{example("ButtonPlayground")} {
   .docs-example {
     flex-direction: column;
     gap: $pt-grid-size * 3;
@@ -65,6 +65,35 @@
 
   .#{$ns}-button:not(.#{$ns}-fill) {
     max-width: 200px;
+  }
+}
+
+#{example("ButtonIntent")},
+#{example("ButtonOutlined")},
+#{example("ButtonSize")},
+#{example("ButtonIconWithText")},
+#{example("ButtonIcon")},
+#{example("ButtonStates")} {
+  .docs-code-example {
+    gap: $pt-grid-size;
+  }
+}
+
+#{example("ButtonAlignText")} {
+  .docs-code-example {
+    flex-direction: column;
+    gap: $pt-grid-size;
+  }
+
+  .#{$ns}-button {
+    max-width: 300px;
+    width: 100%;
+  }
+}
+
+#{example("ButtonEllipsizeText")} {
+  .#{$ns}-button {
+    max-width: 250px;
   }
 }
 
