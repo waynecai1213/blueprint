@@ -53,6 +53,16 @@ export interface TagProps
     htmlTitle?: string;
 
     /**
+     * Whether the tag should visually respond to user interactions. If set to `true`, hovering over the
+     * tag will change its color and mouse cursor.
+     *
+     * Tags will be marked as interactive automatically if an onClick handler is provided and this prop is not.
+     *
+     * @default false
+     */
+    interactive?: boolean;
+
+    /**
      * Name of a Blueprint UI icon (or an icon element) to render on the left side of the tag,
      * before the child nodes.
      */
@@ -86,7 +96,7 @@ export const Tag: React.FC<TagProps> = React.forwardRef((props, ref) => {
         fill,
         icon,
         intent,
-        interactive = false,
+        interactive,
         large,
         minimal,
         multiline,
@@ -99,8 +109,9 @@ export const Tag: React.FC<TagProps> = React.forwardRef((props, ref) => {
     } = props;
 
     const isRemovable = Utils.isFunction(onRemove);
+    const isInteractive = interactive ?? htmlProps.onClick != null;
 
-    const [active, interactiveProps] = useInteractiveAttributes(interactive, props, ref, {
+    const [active, interactiveProps] = useInteractiveAttributes(isInteractive, props, ref, {
         defaultTabIndex: 0,
         disabledTabIndex: undefined,
     });
@@ -111,7 +122,7 @@ export const Tag: React.FC<TagProps> = React.forwardRef((props, ref) => {
         {
             [Classes.ACTIVE]: active,
             [Classes.FILL]: fill,
-            [Classes.INTERACTIVE]: interactive,
+            [Classes.INTERACTIVE]: isInteractive,
             [Classes.LARGE]: large,
             [Classes.MINIMAL]: minimal,
             [Classes.ROUND]: round,
@@ -135,7 +146,6 @@ export const Tag: React.FC<TagProps> = React.forwardRef((props, ref) => {
 Tag.defaultProps = {
     active: false,
     fill: false,
-    interactive: false,
     large: false,
     minimal: false,
     round: false,
