@@ -4569,5 +4569,19 @@
         "tags": "table, index, row, rows, columns, agenda, list, order, series, spreadsheet, table, sheet, entry, new, create, plus, provenance",
         "group": "table",
         "codepoint": 62349
+    },
+    {
+        "displayName": "Filter sort: ascending",
+        "iconName": "filter-sort-asc",
+        "tags": "sort, filter, ascending",
+        "group": "interface",
+        "codepoint": 62350
+    },
+    {
+        "displayName": "Filter sort: descending",
+        "iconName": "filter-sort-desc",
+        "tags": "sort, filter, descending",
+        "group": "interface",
+        "codepoint": 62351
     }
 ]
