@@ -4590,5 +4590,12 @@
         "tags": "shape, 3d, object, box, container, view",
         "group": "miscellaneous",
         "codepoint": 62352
+    },
+    {
+        "displayName": "Source",
+        "iconName": "source",
+        "tags": "data, source, data source, sync, cloud",
+        "group": "data",
+        "codepoint": 62353
     }
 ]
