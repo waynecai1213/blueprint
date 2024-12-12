@@ -4592,8 +4592,8 @@
         "codepoint": 62352
     },
     {
-        "displayName": "Source",
-        "iconName": "source",
+        "displayName": "Data cloud",
+        "iconName": "data-cloud",
         "tags": "data, source, data source, sync, cloud",
         "group": "data",
         "codepoint": 62353
